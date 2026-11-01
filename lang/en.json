@@ -42,7 +42,7 @@
       "Busy": "Fog Hex Editor is still saving the previous edit.",
       "Done": "Fog Hex Editor: {mode} {cells} cell(s) for {users} user(s).",
       "Nothing": "Fog Hex Editor: nothing to change (the chosen users have no saved fog here).",
-      "Failed": "Fog Hex Editor: could not update {name}'s fog. See the console (F12) for details.",
+      "Failed": "Fog Hex Editor: could not update {name}'s fog: {error}",
       "NothingToUndo": "Fog Hex Editor: nothing to undo.",
       "Undone": "Fog Hex Editor: undid the last edit.",
       "UndoOtherScene": "Fog Hex Editor: the last edit was on another scene; view that scene to undo it.",

@@ -61,6 +61,22 @@ async function fetchExplorations(scene) {
     && (!level || docLevelId(d) == null || docLevelId(d) === level));
 }
 
+/**
+ * Foundry only updates/deletes documents that sit in the client's FogExploration
+ * collection. Other users' fog isn't cached on the GM's client, so put the freshly
+ * fetched document there for the duration of the operation, then remove it again
+ * (so no stale copy lingers). The GM's own cached document is used as-is.
+ */
+async function withCachedDoc(doc, fn) {
+  const coll = fogClass().collection ?? game.collections.get("FogExploration");
+  if (!coll) return fn(doc);
+  const existing = coll.get(doc.id);
+  if (existing) return fn(existing);
+  coll.set(doc.id, doc);
+  try { return await fn(doc); }
+  finally { if (coll.get(doc.id) === doc) coll.delete(doc.id); }
+}
+
 /* -------------------------------------------- */
 /*  Targets                                     */
 /* -------------------------------------------- */
@@ -308,6 +324,7 @@ async function editCells(cells, mode, users = targetUsers()) {
   const levelId = currentLevelId();
   const holdId = await requestHold(users);
   const entries = [];
+  let failures = 0;
   try {
     const docs = await fetchExplorations(scene);
     const byUser = new Map(docs.map((d) => [docUserId(d), d]));
@@ -327,7 +344,7 @@ async function editCells(cells, mode, users = targetUsers()) {
         paintCells(c, cells, mode);
         const after = encodeFog(c);
         if (doc) {
-          await doc.update({ explored: after });
+          await withCachedDoc(doc, (d) => d.update({ explored: after }));
           entries.push({ docId: doc.id, userId: user.id, before, created: false });
         } else {
           const data = { scene: scene.id, user: user.id, explored: after };
@@ -337,7 +354,8 @@ async function editCells(cells, mode, users = targetUsers()) {
         }
       } catch (err) {
         console.error(`${MODULE_ID} | failed to edit fog for ${user.name}`, err);
-        ui.notifications.error(F("Notify.Failed", { name: user.name }));
+        failures++;
+        ui.notifications.error(F("Notify.Failed", { name: user.name, error: err?.message ?? err }));
       }
     }
   } finally {
@@ -345,7 +363,7 @@ async function editCells(cells, mode, users = targetUsers()) {
     busy = false;
   }
   if (!entries.length) {
-    ui.notifications.info(L("Notify.Nothing"));
+    if (!failures) ui.notifications.info(L("Notify.Nothing"));
   } else {
     undoStack.push({ sceneId: scene.id, levelId, userIds: entries.map((e) => e.userId), entries });
     if (undoStack.length > 50) undoStack.shift();
@@ -377,8 +395,8 @@ async function undo() {
       const doc = byId.get(e.docId);
       if (!doc) continue;
       try {
-        if (e.created) await doc.delete();
-        else await doc.update({ explored: e.before });
+        if (e.created) await withCachedDoc(doc, (d) => d.delete());
+        else await withCachedDoc(doc, (d) => d.update({ explored: e.before }));
       } catch (err) {
         console.error(`${MODULE_ID} | undo failed for ${e.userId}`, err);
       }
