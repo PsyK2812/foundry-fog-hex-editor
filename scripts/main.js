@@ -124,10 +124,28 @@ async function chooseTargets() {
       label: "FHE.Targets.Save",
       callback: (_event, button) => {
         const form = button.form;
-        const mode = form.querySelector("input[name=mode]:checked")?.value ?? "players";
+        let mode = form.querySelector("input[name=mode]:checked")?.value ?? "players";
         const picked = [...form.querySelectorAll("input[name=user]:checked")].map((i) => i.value);
+        // If the ticks differ from "every non-GM user", the ticks win.
+        const players = game.users.filter((u) => !u.isGM).map((u) => u.id);
+        const same = picked.length === players.length && players.every((id) => picked.includes(id));
+        if (!same) mode = "custom";
         return { mode, ids: picked };
       }
+    },
+    render: (_event, dialog) => {
+      const root = dialog?.element ?? dialog;
+      const form = root?.querySelector?.(".fhe-targets");
+      if (!form) return;
+      const radio = (v) => form.querySelector(`input[name=mode][value=${v}]`);
+      form.querySelectorAll("input[name=user]").forEach((box) => box.addEventListener("change", () => {
+        radio("custom").checked = true;
+      }));
+      radio("players").addEventListener("change", () => {
+        form.querySelectorAll("input[name=user]").forEach((box) => {
+          box.checked = !game.users.get(box.value)?.isGM;
+        });
+      });
     },
     rejectClose: false
   });
