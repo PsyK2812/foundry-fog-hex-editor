@@ -84,7 +84,7 @@ async function withCachedDoc(doc, fn) {
 function targetUsers() {
   const t = game.settings.get(MODULE_ID, "targets") ?? {};
   if (t.mode === "custom") return game.users.filter((u) => (t.ids ?? []).includes(u.id));
-  return game.users.filter((u) => !u.isGM);
+  return game.users.contents; // "all" (default): every user, GM included
 }
 
 async function chooseTargets() {
@@ -105,14 +105,14 @@ async function chooseTargets() {
         u.active ? L("Targets.Online") : null,
         withFog.has(u.id) ? L("Targets.HasFog") : L("Targets.NoFog")
       ].filter(Boolean).join(", ");
-      const checked = custom ? ids.has(u.id) : !u.isGM;
+      const checked = custom ? ids.has(u.id) : true;
       return `<label class="fhe-user"><input type="checkbox" name="user" value="${u.id}" ${checked ? "checked" : ""}>
         <span class="fhe-swatch" style="background:${u.color?.css ?? u.color}"></span>
         <span class="fhe-name">${esc(u.name)}</span><span class="fhe-tags">${tags}</span></label>`;
     }).join("");
   const content = `<div class="fog-hex-editor fhe-targets">
       <p class="fhe-hint">${L("Targets.Hint")}</p>
-      <label class="fhe-mode"><input type="radio" name="mode" value="players" ${custom ? "" : "checked"}> ${L("Targets.AllPlayers")}</label>
+      <label class="fhe-mode"><input type="radio" name="mode" value="all" ${custom ? "" : "checked"}> ${L("Targets.All")}</label>
       <label class="fhe-mode"><input type="radio" name="mode" value="custom" ${custom ? "checked" : ""}> ${L("Targets.Custom")}</label>
       <div class="fhe-users">${rows}</div>
     </div>`;
@@ -124,11 +124,11 @@ async function chooseTargets() {
       label: "FHE.Targets.Save",
       callback: (_event, button) => {
         const form = button.form;
-        let mode = form.querySelector("input[name=mode]:checked")?.value ?? "players";
+        let mode = form.querySelector("input[name=mode]:checked")?.value ?? "all";
         const picked = [...form.querySelectorAll("input[name=user]:checked")].map((i) => i.value);
-        // If the ticks differ from "every non-GM user", the ticks win.
-        const players = game.users.filter((u) => !u.isGM).map((u) => u.id);
-        const same = picked.length === players.length && players.every((id) => picked.includes(id));
+        // If the ticks differ from "every user", the ticks win.
+        const everyone = game.users.map((u) => u.id);
+        const same = picked.length === everyone.length && everyone.every((id) => picked.includes(id));
         if (!same) mode = "custom";
         return { mode, ids: picked };
       }
@@ -141,10 +141,8 @@ async function chooseTargets() {
       form.querySelectorAll("input[name=user]").forEach((box) => box.addEventListener("change", () => {
         radio("custom").checked = true;
       }));
-      radio("players").addEventListener("change", () => {
-        form.querySelectorAll("input[name=user]").forEach((box) => {
-          box.checked = !game.users.get(box.value)?.isGM;
-        });
+      radio("all").addEventListener("change", () => {
+        form.querySelectorAll("input[name=user]").forEach((box) => { box.checked = true; });
       });
     },
     rejectClose: false
@@ -654,7 +652,7 @@ class FogHexEditorLayer extends foundry.canvas.layers.InteractionLayer {
 
 Hooks.once("init", () => {
   game.settings.register(MODULE_ID, "targets", {
-    scope: "client", config: false, type: Object, default: { mode: "players", ids: [] }
+    scope: "client", config: false, type: Object, default: { mode: "all", ids: [] }
   });
   game.settings.register(MODULE_ID, "edgePadding", {
     name: "FHE.Settings.EdgePadding.Name", hint: "FHE.Settings.EdgePadding.Hint",

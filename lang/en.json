@@ -25,14 +25,14 @@
     },
     "Targets": {
       "Title": "Whose fog to edit",
-      "AllPlayers": "All players (every non-GM user)",
       "Custom": "Only the users ticked below",
       "GM": "GM",
       "Online": "online",
       "HasFog": "has explored this scene",
       "NoFog": "no fog saved yet",
       "Save": "Save",
-      "Hint": "Edits apply to each chosen user's saved fog for the scene (and level) you are viewing. The preview shows everything any of them has explored."
+      "Hint": "Edits apply to each chosen user's saved fog for the scene (and level) you are viewing. The preview shows everything any of them has explored.",
+      "All": "Everyone (all players and the GM)"
     },
     "Notify": {
       "Active": "Fog Hex Editor: editing fog for {names}.",
