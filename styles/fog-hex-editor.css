@@ -1,0 +1,46 @@
+.fog-hex-editor.fhe-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 360px;
+}
+.fog-hex-editor .fhe-hint {
+  margin: 0 0 0.3rem;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.fog-hex-editor .fhe-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.fog-hex-editor .fhe-users {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+  padding: 0.4rem;
+  border: 1px solid var(--color-border, #7a7971);
+  border-radius: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.fog-hex-editor .fhe-user {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.fog-hex-editor .fhe-swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  flex: none;
+}
+.fog-hex-editor .fhe-name {
+  font-weight: bold;
+}
+.fog-hex-editor .fhe-tags {
+  margin-left: auto;
+  font-size: 0.8em;
+  opacity: 0.7;
+}

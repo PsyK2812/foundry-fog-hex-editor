@@ -1,0 +1,53 @@
+{
+  "FHE": {
+    "Title": "Fog Hex Editor",
+    "Controls": {
+      "Title": "Fog Hex Editor",
+      "Hide": "Hide cells (click or drag; hold Alt to reveal instead)",
+      "Reveal": "Reveal cells (click or drag; hold Alt to hide instead)",
+      "Targets": "Choose whose fog to edit",
+      "Refresh": "Refresh explored-fog preview",
+      "Undo": "Undo last fog edit (Ctrl+Z)"
+    },
+    "Settings": {
+      "EdgePadding": {
+        "Name": "Edge padding (fog pixels)",
+        "Hint": "Grows each painted cell slightly so no thin revealed rim is left along its edge. 0 = exact cell outline."
+      },
+      "OverlayOpacity": {
+        "Name": "Preview darkness",
+        "Hint": "How dark unexplored areas look in the GM preview while the Fog Hex Editor tool is active."
+      },
+      "OverlayColor": {
+        "Name": "Preview color",
+        "Hint": "Color used to show unexplored areas in the GM preview."
+      }
+    },
+    "Targets": {
+      "Title": "Whose fog to edit",
+      "AllPlayers": "All players (every non-GM user)",
+      "Custom": "Only the users ticked below",
+      "GM": "GM",
+      "Online": "online",
+      "HasFog": "has explored this scene",
+      "NoFog": "no fog saved yet",
+      "Save": "Save",
+      "Hint": "Edits apply to each chosen user's saved fog for the scene (and level) you are viewing. The preview shows everything any of them has explored."
+    },
+    "Notify": {
+      "Active": "Fog Hex Editor: editing fog for {names}.",
+      "NoTargets": "Fog Hex Editor: no users chosen. Use the users button to pick whose fog to edit.",
+      "Gridless": "Fog Hex Editor needs a scene with a hex or square grid.",
+      "NoExploration": "Fog exploration is turned off for this scene, so there is no saved fog to edit.",
+      "Busy": "Fog Hex Editor is still saving the previous edit.",
+      "Done": "Fog Hex Editor: {mode} {cells} cell(s) for {users} user(s).",
+      "Nothing": "Fog Hex Editor: nothing to change (the chosen users have no saved fog here).",
+      "Failed": "Fog Hex Editor: could not update {name}'s fog. See the console (F12) for details.",
+      "NothingToUndo": "Fog Hex Editor: nothing to undo.",
+      "Undone": "Fog Hex Editor: undid the last edit.",
+      "UndoOtherScene": "Fog Hex Editor: the last edit was on another scene; view that scene to undo it.",
+      "Hidden": "hid",
+      "Revealed": "revealed"
+    }
+  }
+}

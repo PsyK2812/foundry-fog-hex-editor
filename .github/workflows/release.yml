@@ -1,0 +1,39 @@
+name: Release
+# Publishes a release whenever the version in module.json changes on main
+# (or when run by hand from the Actions tab).
+on:
+  push:
+    branches: [main]
+    paths: [module.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: echo "tag=v$(jq -r .version module.json)" >> "$GITHUB_OUTPUT"
+      - name: Skip if this version is already released
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.v.outputs.tag }}" >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Set download URL in manifest
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          jq --arg d "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}/fog-hex-editor.zip" \
+            '.download=$d' module.json > tmp.json && mv tmp.json module.json
+      - name: Zip
+        if: steps.check.outputs.exists == 'false'
+        run: zip -r fog-hex-editor.zip module.json scripts styles lang README.md LICENSE
+      - name: Publish release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.v.outputs.tag }}" module.json fog-hex-editor.zip \
+            --title "${{ steps.v.outputs.tag }}" --target "${{ github.sha }}" --generate-notes
